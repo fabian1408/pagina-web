@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafetería</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #fff8f0; }
+    header, footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      background: #8d6e63;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    header { top: 0; }
+    footer { bottom: 0; }
+    nav a {
+      margin: 0 15px;
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    main {
+      padding: 80px 20px 60px;
+    }
+    section {
+      display: none;
+      margin-bottom: 40px;
+    }
+    section.active {
+      display: block;
+    }
+    .producto {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      background-color: #ffe0b2;
+      border-radius: 8px;
+    }
+    .producto img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    .carrito-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      background-color: #f3e5f5;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .carrito-item button {
+      margin: 0 5px;
+      background-color: #ba68c8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #4e342e;
+    }
+    button {
+      background-color: #ff7043;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a onclick="mostrarSeccion('inicio')">Inicio</a>
+      <a onclick="mostrarSeccion('productos')">Productos</a>
+      <a onclick="mostrarSeccion('nosotros')">Nosotros</a>
+      <a onclick="mostrarSeccion('contacto')">Contacto</a>
+      <a onclick="mostrarSeccion('carrito')">Carrito</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="inicio" class="active">
+      <h2>Inicio</h2>
+      <p>Bienvenido a nuestra cafetería.</p>
+    </section>
+
+    <section id="productos">
+      <h2>Productos</h2>
+      <div class="producto">
+        <img src="https://via.placeholder.com/150" alt="Producto">
+        <div>
+          <h3>Producto 1</h3>
+          <p>Precio: $10</p>
+          <button onclick="agregarAlCarrito('Producto 1', 10)">Agregar al carrito</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="nosotros">
+      <h2>Nosotros</h2>
+      <p>Somos una cafetería dedicada a ofrecer los mejores sabores.</p>
+    </section>
+
+    <section id="contacto">
+      <h2>Contacto</h2>
+      <p>Escríbenos a contacto@cafeteria.com</p>
+    </section>
+
+    <section id="carrito">
+      <h2>Carrito</h2>
+      <div id="lista-carrito"></div>
+      <div class="total" id="total-carrito"></div>
+      <button onclick="enviarWhatsApp()">Comprar por WhatsApp</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Cafetería. Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    const carrito = {};
+
+    function mostrarSeccion(id) {
+      document.querySelectorAll('main section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function agregarAlCarrito(nombre, precio) {
+      if (!carrito[nombre]) {
+        carrito[nombre] = { cantidad: 0, precio: precio };
+      }
+      carrito[nombre].cantidad++;
+      actualizarCarrito();
+    }
+
+    function cambiarCantidad(nombre, delta) {
+      if (carrito[nombre]) {
+        carrito[nombre].cantidad += delta;
+        if (carrito[nombre].cantidad <= 0) delete carrito[nombre];
+        actualizarCarrito();
+      }
+    }
+
+    function actualizarCarrito() {
+      const lista = document.getElementById('lista-carrito');
+      const total = document.getElementById('total-carrito');
+      lista.innerHTML = '';
+      let totalGeneral = 0;
+
+      for (let nombre in carrito) {
+        const item = carrito[nombre];
+        const totalItem = item.precio * item.cantidad;
+        totalGeneral += totalItem;
+
+        lista.innerHTML += `
+          <div class="carrito-item">
+            <span>${nombre} (x${item.cantidad})</span>
+            <span>
+              $${totalItem.toFixed(2)}
+              <button onclick="cambiarCantidad('${nombre}', 1)">+</button>
+              <button onclick="cambiarCantidad('${nombre}', -1)">-</button>
+            </span>
+          </div>`;
+      }
+
+      total.textContent = `Total: $${totalGeneral.toFixed(2)}`;
+    }
+
+    function enviarWhatsApp() {
+      let mensaje = "Hola, quiero comprar:\n";
+      let totalGeneral = 0;
+      for (let nombre in carrito) {
+        const item = carrito[nombre];
+        const subtotal = item.precio * item.cantidad;
+        mensaje += `${nombre} x${item.cantidad} = $${subtotal.toFixed(2)}\n`;
+        totalGeneral += subtotal;
+      }
+      mensaje += `\nTotal: $${totalGeneral.toFixed(2)}`;
+
+      const url = `https://wa.me/573238065192?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+    }
+  </script>
+</body>
+</html>
